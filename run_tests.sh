@@ -1,1 +1,1 @@
-cargo test -p apc_sales --test lib
+cargo test -p apc_sales --test mod
