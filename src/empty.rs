@@ -78,6 +78,11 @@ pub trait EmptyContract {
     #[payable("*")]
     #[endpoint]
     fn buy(&self, _id: u64, _quantity: u64) {
+        require!(
+            !self.auctions(_id).is_empty(),
+            ERR_BUYING_UNEXISTING_AUCTION
+        );
+
         todo!();
     }
 
