@@ -6,14 +6,23 @@ use crate::helpers;
 
 #[test]
 fn buy_one_successful() {
+    buy_n_succesfully(1);
+}
+
+#[test]
+fn buy_two_successful() {
+    buy_n_succesfully(2);
+}
+
+fn buy_n_succesfully(quantity: u64) {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
-    const PRICE: u64 = 100;
+    const PRICE: u64 = 50;
 
-    setup.create_default_auction(PRICE, 0, 5);
+    setup.create_default_auction(PRICE, 0, quantity);
     setup
         .blockchain_wrapper
-        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE));
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * quantity));
 
     // buy
     setup
@@ -21,9 +30,9 @@ fn buy_one_successful() {
         .execute_tx(
             &setup.user_address,
             &setup.contract_wrapper,
-            &rust_biguint!(100),
+            &rust_biguint!(PRICE * quantity),
             |sc| {
-                sc.buy(1);
+                sc.buy(quantity);
             },
         )
         .assert_ok();
@@ -38,7 +47,7 @@ fn buy_one_successful() {
         &setup.user_address,
         crate::helpers::DEFAULT_AUCTION_SELL_TOKEN,
         crate::helpers::DEFAULT_AUCTION_SELL_NONCE,
-        &rust_biguint!(0),
+        &rust_biguint!(quantity),
         Option::Some(&BoxedBytes::empty()),
     );
 }
