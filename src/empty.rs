@@ -7,7 +7,7 @@ multiversx_sc::imports!();
 
 pub mod auction;
 
-const STARTING_AUCTION_ID: u64 = 1;
+pub const STARTING_AUCTION_ID: u64 = 1;
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {

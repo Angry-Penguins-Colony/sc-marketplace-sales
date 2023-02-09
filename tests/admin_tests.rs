@@ -1,4 +1,4 @@
-use apc_sales::{auction::Auction, EmptyContract};
+use apc_sales::{auction::Auction, EmptyContract, STARTING_AUCTION_ID};
 use multiversx_sc::types::{BoxedBytes, TokenIdentifier};
 use multiversx_sc_scenario::{managed_biguint, managed_token_id_wrapped, rust_biguint, DebugApi};
 
@@ -10,46 +10,39 @@ fn create_auction() {
 
     const PRICE_TOKEN: &[u8] = b"ITEM-a1a1a1";
     const PRICE_NONCE: u64 = 600u64;
+    const PRICE: u64 = 10;
+    const START_TIMESTAMP: u64 = 0;
 
     const SELL_TOKEN: &[u8] = b"HAT-ffffff";
     const SELL_NONCE: u64 = 2;
+    const SELL_QUANTITY: u64 = 5;
 
-    setup.blockchain_wrapper.set_nft_balance(
-        &setup.owner_address,
+    setup.create_auction(
         SELL_TOKEN,
         SELL_NONCE,
-        &rust_biguint!(1),
-        &BoxedBytes::empty(),
+        PRICE_TOKEN,
+        PRICE_NONCE,
+        PRICE,
+        START_TIMESTAMP,
+        SELL_QUANTITY,
     );
 
     setup
         .blockchain_wrapper
-        .execute_esdt_transfer(
-            &setup.owner_address,
-            &setup.contract_wrapper,
-            SELL_TOKEN,
-            SELL_NONCE,
-            &rust_biguint!(1),
-            |sc| {
-                let auction_id = sc.create_auction(
-                    managed_token_id_wrapped!(PRICE_TOKEN),
-                    PRICE_NONCE,
-                    managed_biguint!(10),
-                    0,
-                );
+        .execute_query(&setup.contract_wrapper, |sc| {
+            assert_eq!(sc.next_auction_id().get(), STARTING_AUCTION_ID + 1);
 
-                assert_eq!(
-                    sc.auctions(auction_id).get(),
-                    Auction {
-                        price_token_identifier: managed_token_id_wrapped!(PRICE_TOKEN),
-                        price_token_nonce: PRICE_NONCE,
-                        price: managed_biguint!(10),
-                        start_timestamp: 0,
-                        sell_token: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
-                        sell_nonce: SELL_NONCE
-                    }
-                );
-            },
-        )
+            assert_eq!(
+                sc.auctions(STARTING_AUCTION_ID).get(),
+                Auction {
+                    price_token_identifier: managed_token_id_wrapped!(PRICE_TOKEN),
+                    price_token_nonce: PRICE_NONCE,
+                    price: managed_biguint!(10),
+                    start_timestamp: 0,
+                    sell_token: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
+                    sell_nonce: SELL_NONCE
+                }
+            );
+        })
         .assert_ok();
 }
