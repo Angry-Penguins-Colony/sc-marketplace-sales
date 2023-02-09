@@ -1,20 +1,18 @@
 [package]
-name = "empty"
+name = "apc-sales"
 version = "0.0.0"
-authors = ["you"]
+authors = ["Angry Penguins Colony"]
 edition = "2021"
 publish = false
 
 [lib]
-path = "src/empty.rs"
+path = "src/main.rs"
 
 [dependencies.multiversx-sc]
 version = "0.39.5"
-path = "../../../framework/base"
 
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.39.5"
-path = "../../../framework/scenario"
 
 [dev-dependencies]
 num-bigint = "0.4.2"
