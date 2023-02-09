@@ -1,6 +1,7 @@
 use apc_sales::{
     EmptyContract, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT, ERR_INVALID_PAYMENT_WRONG_NONCE_SENT,
     ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT, ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET,
+    STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::rust_biguint;
@@ -40,7 +41,7 @@ fn buy_fail_if_locked() {
             &setup.contract_wrapper,
             &rust_biguint!(PRICE * QUANTITY),
             |sc| {
-                sc.buy(QUANTITY);
+                sc.buy(STARTING_AUCTION_ID, QUANTITY);
             },
         )
         .assert_user_error(ERR_SALE_IS_NOT_OPENED_YET);
@@ -63,7 +64,7 @@ fn buy_fail_wrong_amount_sent() {
             &setup.contract_wrapper,
             &rust_biguint!(SEND_PRICE),
             |sc| {
-                sc.buy(QUANTITY);
+                sc.buy(STARTING_AUCTION_ID, QUANTITY);
             },
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
@@ -96,7 +97,7 @@ fn buy_fail_wrong_token_sent() {
             SELL_TOKEN,
             SELL_NONCE,
             &rust_biguint!(PRICE),
-            |sc| sc.buy(QUANTITY),
+            |sc| sc.buy(STARTING_AUCTION_ID, QUANTITY),
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT);
 }
@@ -130,7 +131,7 @@ fn buy_fail_wrong_nonce_sent() {
             SELL_TOKEN,
             SELL_NONCE_SENT,
             &rust_biguint!(PRICE),
-            |sc| sc.buy(QUANTITY),
+            |sc| sc.buy(STARTING_AUCTION_ID, QUANTITY),
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_NONCE_SENT);
 }
@@ -158,7 +159,7 @@ fn buy_fail_if_not_enough_quantity_remaining() {
             &setup.contract_wrapper,
             &rust_biguint!(PRICE * BUY_QUANTITY),
             |sc| {
-                sc.buy(BUY_QUANTITY);
+                sc.buy(STARTING_AUCTION_ID, BUY_QUANTITY);
             },
         )
         .assert_user_error(ERR_NOT_ENOUGHT_ITEMS);
@@ -182,7 +183,7 @@ fn buy_n_succesfully(quantity: u64) {
             &setup.contract_wrapper,
             &rust_biguint!(PRICE * quantity),
             |sc| {
-                sc.buy(quantity);
+                sc.buy(STARTING_AUCTION_ID, quantity);
             },
         )
         .assert_ok();

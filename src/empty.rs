@@ -76,7 +76,7 @@ pub trait EmptyContract {
 
     #[payable("*")]
     #[endpoint]
-    fn buy(&self, _quantity: u64) {
+    fn buy(&self, _id: u64, _quantity: u64) {
         todo!();
     }
 
