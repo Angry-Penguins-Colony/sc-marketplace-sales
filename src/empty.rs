@@ -9,6 +9,11 @@ pub mod auction;
 
 pub const STARTING_AUCTION_ID: u64 = 1;
 
+pub const ERR_SALE_IS_NOT_OPENED_YET: &str = "The sale is not opened yet";
+pub const ERR_INVALID_PAYMENT: &str =
+    "The payment is invalid. You are send the wrong token, nonce or amount.";
+pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
+
 #[multiversx_sc::contract]
 pub trait EmptyContract {
     #[storage_mapper("auctions")]
