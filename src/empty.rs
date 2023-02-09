@@ -15,6 +15,7 @@ pub const ERR_INVALID_PAYMENT_WRONG_NONCE_SENT: &str = "The payment is invalid. 
 pub const ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT: &str =
     "The payment is invalid. Wrong amount sent.";
 pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
+pub const ERR_BUYING_UNEXISTING_AUCTION: &str = "Auction ID invalid.";
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {

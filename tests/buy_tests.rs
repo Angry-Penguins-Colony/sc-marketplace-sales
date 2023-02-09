@@ -1,7 +1,7 @@
 use apc_sales::{
-    EmptyContract, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT, ERR_INVALID_PAYMENT_WRONG_NONCE_SENT,
-    ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT, ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET,
-    STARTING_AUCTION_ID,
+    EmptyContract, ERR_BUYING_UNEXISTING_AUCTION, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
+    ERR_INVALID_PAYMENT_WRONG_NONCE_SENT, ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT,
+    ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::rust_biguint;
@@ -163,6 +163,31 @@ fn buy_fail_if_not_enough_quantity_remaining() {
             },
         )
         .assert_user_error(ERR_NOT_ENOUGHT_ITEMS);
+}
+
+fn buy_fails_if_unexisting_auction() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const PRICE: u64 = 50;
+    const UNEXISTING_AUCTION_ID: u64 = STARTING_AUCTION_ID + 1;
+
+    setup.create_default_auction(PRICE, 0, 1);
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * 1));
+
+    // buy
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(PRICE * 1),
+            |sc| {
+                sc.buy(UNEXISTING_AUCTION_ID, 1);
+            },
+        )
+        .assert_user_error(ERR_BUYING_UNEXISTING_AUCTION);
 }
 
 fn buy_n_succesfully(quantity: u64) {
