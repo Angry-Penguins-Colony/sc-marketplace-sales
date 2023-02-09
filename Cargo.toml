@@ -1,5 +1,5 @@
 [package]
-name = "apc-sales"
+name = "apc_sales"
 version = "0.0.0"
 authors = ["Angry Penguins Colony"]
 edition = "2021"

@@ -1,5 +1,5 @@
 [package]
-name = "empty-wasm"
+name = "apc_sales-wasm"
 version = "0.0.0"
 edition = "2021"
 publish = false
@@ -14,7 +14,7 @@ lto = true
 debug = false
 panic = "abort"
 
-[dependencies.empty]
+[dependencies.apc_sales]
 path = ".."
 
 [dependencies.multiversx-sc-wasm-adapter]

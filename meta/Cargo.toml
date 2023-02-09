@@ -1,10 +1,10 @@
 [package]
-name = "empty-meta"
+name = "apc_sales-meta"
 version = "0.0.0"
 edition = "2021"
 publish = false
 
-[dependencies.empty]
+[dependencies.apc_sales]
 path = ".."
 
 [dependencies.multiversx-sc-meta]
