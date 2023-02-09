@@ -1,6 +1,6 @@
 use apc_sales::{auction::Auction, EmptyContract, STARTING_AUCTION_ID};
-use multiversx_sc::types::{BoxedBytes, TokenIdentifier};
-use multiversx_sc_scenario::{managed_biguint, managed_token_id_wrapped, rust_biguint, DebugApi};
+use multiversx_sc::types::{EgldOrEsdtTokenIdentifier, TokenIdentifier};
+use multiversx_sc_scenario::{managed_biguint, DebugApi};
 
 use crate::helpers;
 
@@ -8,8 +8,6 @@ use crate::helpers;
 fn create_auction() {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
-    const PRICE_TOKEN: &[u8] = b"ITEM-a1a1a1";
-    const PRICE_NONCE: u64 = 600u64;
     const PRICE: u64 = 10;
     const START_TIMESTAMP: u64 = 0;
 
@@ -20,8 +18,6 @@ fn create_auction() {
     setup.create_auction(
         SELL_TOKEN,
         SELL_NONCE,
-        PRICE_TOKEN,
-        PRICE_NONCE,
         PRICE,
         START_TIMESTAMP,
         SELL_QUANTITY,
@@ -35,10 +31,10 @@ fn create_auction() {
             assert_eq!(
                 sc.auctions(STARTING_AUCTION_ID).get(),
                 Auction {
-                    price_token_identifier: managed_token_id_wrapped!(PRICE_TOKEN),
-                    price_token_nonce: PRICE_NONCE,
-                    price: managed_biguint!(10),
-                    start_timestamp: 0,
+                    price_token_identifier: EgldOrEsdtTokenIdentifier::egld(),
+                    price_token_nonce: 0,
+                    price: managed_biguint!(PRICE),
+                    start_timestamp: START_TIMESTAMP,
                     sell_token: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
                     sell_nonce: SELL_NONCE
                 }
