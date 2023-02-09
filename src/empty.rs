@@ -1,4 +1,5 @@
 #![no_std]
+#![no_main]
 
 multiversx_sc::imports!();
 
@@ -12,9 +13,9 @@ pub trait EmptyContract {
     #[endpoint(createAuction)]
     fn create_auction(
         &self,
-        token: TokenIdentifier,
-        nonce: u64,
-        price: BigUint,
+        _token: TokenIdentifier,
+        _nonce: u64,
+        _price: BigUint,
     ) {
         // let payments = self.call_value().all_esdt_transfers();
         todo!();
@@ -24,7 +25,7 @@ pub trait EmptyContract {
     #[endpoint(stopAuction)]
     fn stop_auction(
         &self, 
-        id: u64
+        _id: u64
     ) {
         todo!();
     }
@@ -33,8 +34,8 @@ pub trait EmptyContract {
     #[endpoint(retireTokenFromAuction)]
     fn retire_token_from_auction(
         &self,
-        id: u64, 
-        amount: u64
+        _id: u64, 
+        _amount: u64
     ) {
         todo!();
     }
@@ -49,7 +50,7 @@ pub trait EmptyContract {
     #[endpoint]
     fn buy(
         &self,
-        quantity: u64
+        _quantity: u64
     ) {
         todo!();
     }
@@ -57,7 +58,7 @@ pub trait EmptyContract {
     #[view(getAuction)]
     fn get_auction(
         &self,
-        id: u64
+        _id: u64
     ) {
         todo!();
     }

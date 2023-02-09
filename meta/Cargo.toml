@@ -1,8 +1,11 @@
 [package]
 name = "apc_sales-meta"
 version = "0.0.0"
-edition = "2021"
+edition = "2018"
 publish = false
+authors = [ "you",]
+
+[dev-dependencies]
 
 [dependencies.apc_sales]
 path = ".."

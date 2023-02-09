@@ -1,0 +1,1 @@
+cargo test -p apc_sales --test lib

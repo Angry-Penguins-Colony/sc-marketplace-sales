@@ -1,23 +1,23 @@
-use empty::*;
+use apc_sales::*;
 use multiversx_sc::types::Address;
 use multiversx_sc_scenario::{rust_biguint, testing_framework::*, DebugApi};
 
-const WASM_PATH: &str = "output/empty.wasm";
+const WASM_PATH: &str = "output/apc_sales.wasm";
 
-struct ContractSetup<ContractObjBuilder>
+pub struct ContractSetup<ContractObjBuilder>
 where
-    ContractObjBuilder: 'static + Copy + Fn() -> empty::ContractObj<DebugApi>,
+    ContractObjBuilder: 'static + Copy + Fn() -> apc_sales::ContractObj<DebugApi>,
 {
     pub blockchain_wrapper: BlockchainStateWrapper,
     pub owner_address: Address,
-    pub contract_wrapper: ContractObjWrapper<empty::ContractObj<DebugApi>, ContractObjBuilder>,
+    pub contract_wrapper: ContractObjWrapper<apc_sales::ContractObj<DebugApi>, ContractObjBuilder>,
 }
 
-fn setup_contract<ContractObjBuilder>(
+pub fn setup_contract<ContractObjBuilder>(
     cf_builder: ContractObjBuilder,
 ) -> ContractSetup<ContractObjBuilder>
 where
-    ContractObjBuilder: 'static + Copy + Fn() -> empty::ContractObj<DebugApi>,
+    ContractObjBuilder: 'static + Copy + Fn() -> apc_sales::ContractObj<DebugApi>,
 {
     let rust_zero = rust_biguint!(0u64);
     let mut blockchain_wrapper = BlockchainStateWrapper::new();
@@ -46,7 +46,7 @@ where
 
 #[test]
 fn deploy_test() {
-    let mut setup = setup_contract(empty::contract_obj);
+    let mut setup = setup_contract(apc_sales::contract_obj);
 
     // simulate deploy
     setup
