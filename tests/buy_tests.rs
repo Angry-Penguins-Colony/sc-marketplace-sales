@@ -165,6 +165,7 @@ fn buy_fail_if_not_enough_quantity_remaining() {
         .assert_user_error(ERR_NOT_ENOUGHT_ITEMS);
 }
 
+#[test]
 fn buy_fails_if_unexisting_auction() {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
