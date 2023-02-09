@@ -1,7 +1,6 @@
 use apc_sales::{
-    EmptyContract, ERR_INVALID_PAYMENT, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
-    ERR_INVALID_PAYMENT_WRONG_NONCE_SENT, ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT,
-    ERR_SALE_IS_NOT_OPENED_YET,
+    EmptyContract, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT, ERR_INVALID_PAYMENT_WRONG_NONCE_SENT,
+    ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT, ERR_SALE_IS_NOT_OPENED_YET,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::rust_biguint;
@@ -76,13 +75,11 @@ fn buy_fail_wrong_token_sent() {
 
     const PRICE: u64 = 50;
     const QUANTITY: u64 = 1;
-    const START_TIMESTAMP: u64 = 10;
-    const NOW_TIMESTAMP: u64 = 5;
 
     const SELL_TOKEN: &[u8] = b"SELL-ffffff";
     const SELL_NONCE: u64 = 1;
 
-    setup.create_default_auction(PRICE, START_TIMESTAMP, QUANTITY);
+    setup.create_default_auction(PRICE, 0, QUANTITY);
     setup.blockchain_wrapper.set_nft_balance(
         &setup.user_address,
         SELL_TOKEN,
@@ -110,8 +107,6 @@ fn buy_fail_wrong_nonce_sent() {
 
     const PRICE: u64 = 50;
     const QUANTITY: u64 = 1;
-    const START_TIMESTAMP: u64 = 10;
-    const NOW_TIMESTAMP: u64 = 5;
 
     const SELL_TOKEN: &[u8] = b"SELL-ffffff";
 
