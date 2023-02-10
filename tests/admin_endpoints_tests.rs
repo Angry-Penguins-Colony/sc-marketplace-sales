@@ -209,3 +209,129 @@ fn add_tokens_fails_if_bad_id() {
         )
         .assert_user_error(ERR_INVALID_AUCTION_ID);
 }
+
+#[test]
+fn withdraw_works_with_egld() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const PRICE: u64 = 1;
+
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, INITIAL_QUANTITY);
+
+    // 1. user buy
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE));
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(PRICE),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .check_egld_balance(&setup.owner_address, &rust_biguint!(0));
+
+    // 2. call withdraw
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.withdraw_balance();
+            },
+        )
+        .assert_ok();
+
+    // 3. assert balance
+    setup
+        .blockchain_wrapper
+        .check_egld_balance(&setup.owner_address, &rust_biguint!(PRICE));
+}
+
+#[test]
+fn withdraw_works_with_esdt() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const PRICE: u64 = 1;
+
+    const INPUT_TOKEN_ID: &[u8] = b"INPUT-aaaaaa";
+    const INPUT_TOKEN_NONCE: u64 = 1;
+
+    const OUTPUT_TOKEN_ID: &[u8] = b"OUTPUT-ffffff";
+    const OUTPUT_TOKEN_NONCE: u64 = 1;
+
+    setup.create_auction_buyable_in_esdt(
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        OUTPUT_TOKEN_ID,
+        OUTPUT_TOKEN_NONCE,
+        PRICE,
+        0,
+        INITIAL_QUANTITY,
+    );
+
+    // 2. the user buy
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.user_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(PRICE),
+        &BoxedBytes::empty(),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_esdt_transfer(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            INPUT_TOKEN_ID,
+            INPUT_TOKEN_NONCE,
+            &rust_biguint!(PRICE),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    // 3. withdraw
+    setup.blockchain_wrapper.check_nft_balance(
+        &setup.owner_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(0),
+        Option::Some(&BoxedBytes::empty()),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.withdraw_balance();
+            },
+        )
+        .assert_ok();
+
+    // 4. assert eq
+    setup.blockchain_wrapper.check_nft_balance(
+        &setup.owner_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(PRICE),
+        Option::Some(&BoxedBytes::empty()),
+    );
+}
