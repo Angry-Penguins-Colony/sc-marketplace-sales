@@ -1,7 +1,7 @@
 use apc_sales::{
     EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
     ERR_INVALID_PAYMENT_WRONG_NONCE_SENT, ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT,
-    ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET, STARTING_AUCTION_ID,
+    ERR_INVALID_QUANTITY, ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::rust_biguint;
@@ -229,6 +229,28 @@ fn buy_with_0_egld_amount() {
             },
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
+}
+
+#[test]
+fn buy_with_0_quantity() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const PRICE: u64 = 50;
+
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, 1);
+
+    // buy
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID, 0);
+            },
+        )
+        .assert_user_error(ERR_INVALID_QUANTITY);
 }
 
 fn buy_n_succesfully(quantity: u64) {

@@ -16,6 +16,7 @@ pub const ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT: &str =
     "The payment is invalid. Wrong amount sent.";
 pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
 pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
+pub const ERR_INVALID_QUANTITY: &str = "Invalid quantity.";
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {
@@ -78,6 +79,8 @@ pub trait EmptyContract {
     #[payable("*")]
     #[endpoint]
     fn buy(&self, auction_id: u64, _quantity: u64) {
+        require!(_quantity > 0, ERR_INVALID_QUANTITY);
+
         require!(
             !self.auctions(auction_id).is_empty(),
             ERR_INVALID_AUCTION_ID
