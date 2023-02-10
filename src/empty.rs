@@ -110,14 +110,20 @@ pub trait EmptyContract {
         let wanted_buy_amount = payment.amount / &auction.price;
 
         require!(
-            self.get_remaining_amount(auction) >= wanted_buy_amount,
+            self.get_remaining_amount(&auction) >= wanted_buy_amount,
             ERR_NOT_ENOUGHT_ITEMS
         );
 
-        todo!();
+        // Send nfts
+        self.send().direct_esdt(
+            &self.blockchain().get_caller(),
+            &auction.sell_token,
+            auction.sell_nonce,
+            &wanted_buy_amount,
+        );
     }
 
-    fn get_remaining_amount(&self, auction: Auction<Self::Api>) -> BigUint<Self::Api> {
+    fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
         self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &auction.sell_token,

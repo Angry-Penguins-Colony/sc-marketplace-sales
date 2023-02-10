@@ -60,7 +60,7 @@ where
                 &self.contract_wrapper,
                 sell_token,
                 sell_nonce,
-                &rust_biguint!(1),
+                &rust_biguint!(quantity),
                 |sc| {
                     let _ = sc.create_auction(
                         EgldOrEsdtTokenIdentifier::egld(),
