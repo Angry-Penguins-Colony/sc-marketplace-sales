@@ -1,4 +1,4 @@
-use apc_sales::{EmptyContract, STARTING_AUCTION_ID};
+use apc_sales::{EmptyContract, ERR_INVALID_AUCTION_ID, STARTING_AUCTION_ID};
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::{managed_biguint, rust_biguint};
 
@@ -53,4 +53,41 @@ fn retire_token_should_work() {
             assert_eq!(auction.remaining_output_items, REMAINING_QUANTITY);
         })
         .assert_ok();
+}
+
+#[test]
+fn retire_token_fails_if_bad_auction_id() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| sc.retire_token_from_auction(STARTING_AUCTION_ID, &managed_biguint!(1)),
+        )
+        .assert_user_error(ERR_INVALID_AUCTION_ID);
+
+    todo!();
+}
+
+#[test]
+fn add_tokens_should_work() {
+    todo!();
+}
+
+#[test]
+fn add_tokens_fails_if_send_wrong_token_identifier() {
+    todo!();
+}
+
+#[test]
+fn add_tokens_fails_if_send_wrong_token_nonce() {
+    todo!();
+}
+
+#[test]
+fn add_tokens_fails_if_bad_id() {
+    todo!();
 }

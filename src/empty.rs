@@ -69,6 +69,13 @@ pub trait EmptyContract {
     }
 
     #[only_owner]
+    #[endpoint(addTokenToAuction)]
+    #[payable("*")]
+    fn add_token_to_auction(&self, _auction_id: u64) {
+        todo!();
+    }
+
+    #[only_owner]
     #[endpoint(retireTokenFromAuction)]
     fn retire_token_from_auction(&self, auction_id: u64, amount: &BigUint<Self::Api>) {
         let caller = self.blockchain().get_caller();
@@ -92,9 +99,7 @@ pub trait EmptyContract {
     #[payable("*")]
     #[endpoint]
     fn buy(&self, auction_id: u64) {
-        self.require_valid_auction_id(auction_id);
-
-        let auction = self.auctions(auction_id).get();
+        let auction = self.get_auction(auction_id);
 
         require!(
             self.blockchain().get_block_timestamp() >= auction.start_timestamp,
@@ -135,29 +140,24 @@ pub trait EmptyContract {
     }
 
     fn get_auction(&self, auction_id: u64) -> Auction<Self::Api> {
-        self.require_valid_auction_id(auction_id);
+        require!(
+            !self.auctions(auction_id).is_empty(),
+            ERR_INVALID_AUCTION_ID
+        );
 
         return self.auctions(auction_id).get();
     }
 
     #[view(getAuctionStats)]
     fn get_auction_stats(&self, auction_id: u64) -> AuctionStats<Self::Api> {
-        self.require_valid_auction_id(auction_id);
+        let auction = self.get_auction(auction_id);
 
-        let auction = self.auctions(auction_id).get();
         let remaining_output_items = self.get_remaining_amount(&auction);
 
         return AuctionStats {
             auction,
             remaining_output_items,
         };
-    }
-
-    fn require_valid_auction_id(&self, auction_id: u64) {
-        require!(
-            !self.auctions(auction_id).is_empty(),
-            ERR_INVALID_AUCTION_ID
-        );
     }
 
     fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
