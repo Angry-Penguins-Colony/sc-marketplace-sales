@@ -103,7 +103,7 @@ pub trait EmptyContract {
         );
 
         require!(
-            &payment.amount % &auction.price == 0,
+            &payment.amount > &0 && &payment.amount % &auction.price == 0,
             ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT
         );
 

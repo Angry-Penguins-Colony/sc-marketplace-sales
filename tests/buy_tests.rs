@@ -208,6 +208,29 @@ fn buy_fails_if_unexisting_auction() {
         .assert_user_error(ERR_INVALID_AUCTION_ID);
 }
 
+#[test]
+fn buy_with_0_egld_amount() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const PRICE: u64 = 50;
+    const QUANTITY: u64 = 1;
+
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, QUANTITY);
+
+    // buy
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID, QUANTITY);
+            },
+        )
+        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
+}
+
 fn buy_n_succesfully(quantity: u64) {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
