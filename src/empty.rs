@@ -69,12 +69,6 @@ pub trait EmptyContract {
     }
 
     #[only_owner]
-    #[endpoint(stopAuction)]
-    fn stop_auction(&self, _id: u64) {
-        todo!();
-    }
-
-    #[only_owner]
     #[endpoint(retireTokenFromAuction)]
     fn retire_token_from_auction(&self, _id: u64, _amount: u64) {
         todo!();
