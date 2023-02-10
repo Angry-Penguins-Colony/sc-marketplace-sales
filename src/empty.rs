@@ -88,13 +88,10 @@ pub trait EmptyContract {
 
     #[payable("*")]
     #[endpoint]
-    fn buy(&self, auction_id: u64, _quantity: u64) {
-        require!(_quantity > 0, ERR_INVALID_QUANTITY);
+    fn buy(&self, auction_id: u64, quantity: u64) {
+        require!(quantity > 0, ERR_INVALID_QUANTITY);
 
-        require!(
-            !self.auctions(auction_id).is_empty(),
-            ERR_INVALID_AUCTION_ID
-        );
+        self.require_valid_auction_id(auction_id);
 
         let auction = self.auctions(auction_id).get();
 
@@ -136,22 +133,11 @@ pub trait EmptyContract {
         );
     }
 
-    fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
-        self.blockchain().get_esdt_balance(
-            &self.blockchain().get_sc_address(),
-            &auction.output_token_id,
-            auction.output_token_nonce,
-        )
-    }
-
     #[view(getAuction)]
-    fn get_auction(&self, id: u64) -> AuctionStats<Self::Api> {
-        require!(
-            self.auctions(id).is_empty() == false,
-            ERR_INVALID_AUCTION_ID,
-        );
+    fn get_auction(&self, auction_id: u64) -> AuctionStats<Self::Api> {
+        self.require_valid_auction_id(auction_id);
 
-        let auction = self.auctions(id).get();
+        let auction = self.auctions(auction_id).get();
         let remaining_output_items = self.get_remaining_amount(&auction);
 
         return AuctionStats {
@@ -163,5 +149,20 @@ pub trait EmptyContract {
     #[view(getActiveAuctions)]
     fn get_active_auctions(&self) {
         todo!();
+    }
+
+    fn require_valid_auction_id(&self, auction_id: u64) {
+        require!(
+            !self.auctions(auction_id).is_empty(),
+            ERR_INVALID_AUCTION_ID
+        );
+    }
+
+    fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
+        self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &auction.output_token_id,
+            auction.output_token_nonce,
+        )
     }
 }
