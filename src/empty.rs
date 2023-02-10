@@ -43,6 +43,10 @@ pub trait EmptyContract {
         price: BigUint,
         start_timestamp: u64,
     ) -> u64 {
+        if input_token_id.is_egld() {
+            require!(input_token_nonce == 0, ERR_CREATE_AUCTION_BAD_EGLD_NONCE);
+        }
+
         let payments = self.call_value().single_esdt();
 
         let new_auction_id = self.next_auction_id().get();
