@@ -70,8 +70,17 @@ pub trait EmptyContract {
 
     #[only_owner]
     #[endpoint(retireTokenFromAuction)]
-    fn retire_token_from_auction(&self, _id: u64, _amount: u64) {
-        todo!();
+    fn retire_token_from_auction(&self, auction_id: u64, amount: &BigUint<Self::Api>) {
+        let caller = self.blockchain().get_caller();
+
+        let auction = self.get_auction(auction_id);
+
+        self.send().direct_esdt(
+            &caller,
+            &auction.output_token_id,
+            auction.output_token_nonce,
+            amount,
+        );
     }
 
     #[only_owner]
@@ -125,8 +134,14 @@ pub trait EmptyContract {
         );
     }
 
-    #[view(getAuction)]
-    fn get_auction(&self, auction_id: u64) -> AuctionStats<Self::Api> {
+    fn get_auction(&self, auction_id: u64) -> Auction<Self::Api> {
+        self.require_valid_auction_id(auction_id);
+
+        return self.auctions(auction_id).get();
+    }
+
+    #[view(getAuctionStats)]
+    fn get_auction_stats(&self, auction_id: u64) -> AuctionStats<Self::Api> {
         self.require_valid_auction_id(auction_id);
 
         let auction = self.auctions(auction_id).get();

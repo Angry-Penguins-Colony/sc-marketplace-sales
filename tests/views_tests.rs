@@ -13,7 +13,7 @@ fn view_get_auction_fail_if_invalid_id() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.contract_wrapper, |sc| {
-            sc.get_auction(0);
+            sc.get_auction_stats(0);
         })
         .assert_user_error(ERR_INVALID_AUCTION_ID);
 }
@@ -31,7 +31,7 @@ fn view_get_auction_works() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.contract_wrapper, |sc| {
-            let actual_auction_stats = sc.get_auction(STARTING_AUCTION_ID);
+            let actual_auction_stats = sc.get_auction_stats(STARTING_AUCTION_ID);
 
             let expected_auction_stats = AuctionStats {
                 auction: Auction {

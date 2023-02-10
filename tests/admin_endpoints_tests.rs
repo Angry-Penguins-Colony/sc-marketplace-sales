@@ -1,6 +1,6 @@
 use apc_sales::{EmptyContract, STARTING_AUCTION_ID};
 use multiversx_sc::types::BoxedBytes;
-use multiversx_sc_scenario::rust_biguint;
+use multiversx_sc_scenario::{managed_biguint, rust_biguint};
 
 use crate::helpers;
 
@@ -20,7 +20,12 @@ fn retire_token_should_work() {
             &setup.owner_address,
             &setup.contract_wrapper,
             &rust_biguint!(0),
-            |sc| sc.retire_token_from_auction(STARTING_AUCTION_ID, RETIRED_QUANTITY),
+            |sc| {
+                sc.retire_token_from_auction(
+                    STARTING_AUCTION_ID,
+                    &managed_biguint!(RETIRED_QUANTITY),
+                )
+            },
         )
         .assert_ok();
 
@@ -43,7 +48,7 @@ fn retire_token_should_work() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.contract_wrapper, |sc| {
-            let auction = sc.get_auction(STARTING_AUCTION_ID);
+            let auction = sc.get_auction_stats(STARTING_AUCTION_ID);
 
             assert_eq!(auction.remaining_output_items, REMAINING_QUANTITY);
         })
