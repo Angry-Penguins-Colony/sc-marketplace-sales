@@ -6,8 +6,8 @@ use multiversx_sc_scenario::{
 
 const WASM_PATH: &str = "output/apc_sales.wasm";
 
-pub const DEFAULT_AUCTION_SELL_TOKEN: &[u8] = b"SELL-aaaaaa";
-pub const DEFAULT_AUCTION_SELL_NONCE: u64 = 1u64;
+pub const DEFAULT_AUCTION_OUTPUT_TOKEN: &[u8] = b"SELL-aaaaaa";
+pub const DEFAULT_AUCTION_OUTPUT_NONCE: u64 = 1u64;
 
 pub struct ContractSetup<ContractObjBuilder>
 where
@@ -30,8 +30,8 @@ where
         quantity: u64,
     ) {
         self.create_auction_buyable_in_egld(
-            DEFAULT_AUCTION_SELL_TOKEN,
-            DEFAULT_AUCTION_SELL_NONCE,
+            DEFAULT_AUCTION_OUTPUT_TOKEN,
+            DEFAULT_AUCTION_OUTPUT_NONCE,
             price,
             start_timestamp,
             quantity,
@@ -40,16 +40,16 @@ where
 
     pub fn create_auction_buyable_in_egld(
         &mut self,
-        sell_token: &[u8],
-        sell_nonce: u64,
+        output_token_id: &[u8],
+        output_token_nonce: u64,
         price: u64,
         start_timestamp: u64,
         quantity: u64,
     ) {
         self.blockchain_wrapper.set_nft_balance(
             &self.owner_address,
-            sell_token,
-            sell_nonce,
+            output_token_id,
+            output_token_nonce,
             &rust_biguint!(quantity),
             &BoxedBytes::empty(),
         );
@@ -58,8 +58,8 @@ where
             .execute_esdt_transfer(
                 &self.owner_address,
                 &self.contract_wrapper,
-                sell_token,
-                sell_nonce,
+                output_token_id,
+                output_token_nonce,
                 &rust_biguint!(quantity),
                 |sc| {
                     let _ = sc.create_auction(
@@ -75,18 +75,18 @@ where
 
     pub fn create_auction_buyable_in_esdt(
         &mut self,
-        price_token_id: &[u8],
-        price_token_nonce: u64,
-        sell_token: &[u8],
-        sell_nonce: u64,
+        input_token_id: &[u8],
+        input_token_nonce: u64,
+        output_token_id: &[u8],
+        output_token_nonce: u64,
         price: u64,
         start_timestamp: u64,
         quantity: u64,
     ) {
         self.blockchain_wrapper.set_nft_balance(
             &self.owner_address,
-            sell_token,
-            sell_nonce,
+            output_token_id,
+            output_token_nonce,
             &rust_biguint!(quantity),
             &BoxedBytes::empty(),
         );
@@ -95,13 +95,13 @@ where
             .execute_esdt_transfer(
                 &self.owner_address,
                 &self.contract_wrapper,
-                sell_token,
-                sell_nonce,
+                output_token_id,
+                output_token_nonce,
                 &rust_biguint!(1),
                 |sc| {
                     let _ = sc.create_auction(
-                        managed_token_id_wrapped!(price_token_id),
-                        price_token_nonce,
+                        managed_token_id_wrapped!(input_token_id),
+                        input_token_nonce,
                         managed_biguint!(price),
                         start_timestamp,
                     );
