@@ -26,6 +26,7 @@ pub trait EmptyContract {
     fn auctions(&self, id: u64) -> SingleValueMapper<Auction<Self::Api>>;
 
     #[storage_mapper("next_auction_id")]
+    #[view(getNextAuctionId)]
     fn next_auction_id(&self) -> SingleValueMapper<u64>;
 
     #[init]
