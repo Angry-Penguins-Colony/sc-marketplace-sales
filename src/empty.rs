@@ -90,7 +90,7 @@ pub trait EmptyContract {
             ERR_SALE_IS_NOT_OPENED_YET
         );
 
-        let payment = self.call_value().single_esdt();
+        let payment = self.call_value().egld_or_single_esdt();
 
         require!(
             payment.token_identifier == auction.price_token_identifier,

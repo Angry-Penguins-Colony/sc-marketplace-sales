@@ -51,22 +51,25 @@ fn buy_fail_if_locked() {
 fn buy_fail_wrong_amount_sent() {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
-    const PRICE: u64 = 50;
-    const EXPECTED_QUANTITY: u64 = 1;
-    const SENT_QUANTITY: u64 = 2;
+    const ACTUAL_PRICE: u64 = 50;
+    const EXPECTED_PRICE: u64 = 75;
 
-    assert_ne!(EXPECTED_QUANTITY, SENT_QUANTITY);
+    assert_ne!(ACTUAL_PRICE, EXPECTED_PRICE);
 
-    setup.create_default_auction_buyable_in_egld(PRICE, 0, 100);
+    setup.create_default_auction_buyable_in_egld(EXPECTED_PRICE, 0, 100);
+
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(ACTUAL_PRICE));
 
     setup
         .blockchain_wrapper
         .execute_tx(
             &setup.user_address,
             &setup.contract_wrapper,
-            &rust_biguint!(PRICE * SENT_QUANTITY),
+            &rust_biguint!(ACTUAL_PRICE),
             |sc| {
-                sc.buy(STARTING_AUCTION_ID, EXPECTED_QUANTITY);
+                sc.buy(STARTING_AUCTION_ID, 1);
             },
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
