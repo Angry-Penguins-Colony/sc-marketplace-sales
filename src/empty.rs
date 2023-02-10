@@ -10,9 +10,11 @@ pub mod auction;
 pub const STARTING_AUCTION_ID: u64 = 1;
 
 pub const ERR_SALE_IS_NOT_OPENED_YET: &str = "The sale is not opened yet";
-pub const ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT: &str = "The payment is invalid. Wrong token sent.";
-pub const ERR_INVALID_PAYMENT_WRONG_NONCE_SENT: &str = "The payment is invalid. Wrong nonce sent.";
-pub const ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT: &str =
+pub const ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH: &str =
+    "The payment is invalid. Wrong token sent.";
+pub const ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH: &str =
+    "The payment is invalid. Wrong nonce sent.";
+pub const ERR_INVALID_PAYMENT_TOKEN_AMOUNT_MISMATCH: &str =
     "The payment is invalid. Wrong amount sent.";
 pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
 pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
@@ -71,8 +73,23 @@ pub trait EmptyContract {
     #[only_owner]
     #[endpoint(addTokenToAuction)]
     #[payable("*")]
-    fn add_token_to_auction(&self, _auction_id: u64) {
-        todo!();
+    fn add_token_to_auction(&self, auction_id: u64) {
+        let mut auction = self.get_auction(auction_id);
+        let payment = self.call_value().single_esdt();
+
+        require!(
+            &payment.token_identifier == &auction.output_token_id,
+            ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH
+        );
+
+        require!(
+            &payment.token_nonce == &auction.output_token_nonce,
+            ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH
+        );
+
+        auction.max_quantity += payment.amount;
+
+        self.auctions(auction_id).set(auction);
     }
 
     #[only_owner]
@@ -110,17 +127,17 @@ pub trait EmptyContract {
 
         require!(
             payment.token_identifier == auction.input_token_id,
-            ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT
+            ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH
         );
 
         require!(
             payment.token_nonce == auction.input_token_nonce,
-            ERR_INVALID_PAYMENT_WRONG_NONCE_SENT
+            ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH
         );
 
         require!(
             &payment.amount > &0 && &payment.amount % &auction.price == 0,
-            ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT
+            ERR_INVALID_PAYMENT_TOKEN_AMOUNT_MISMATCH
         );
 
         let wanted_buy_amount = payment.amount / &auction.price;

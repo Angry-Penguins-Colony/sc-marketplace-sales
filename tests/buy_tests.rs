@@ -1,6 +1,6 @@
 use apc_sales::{
-    EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
-    ERR_INVALID_PAYMENT_WRONG_NONCE_SENT, ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT,
+    EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_TOKEN_AMOUNT_MISMATCH,
+    ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH, ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH,
     ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
@@ -72,7 +72,7 @@ fn buy_fail_wrong_amount_sent() {
                 sc.buy(STARTING_AUCTION_ID);
             },
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_AMOUNT_MISMATCH);
 }
 
 #[test]
@@ -105,7 +105,7 @@ fn buy_fail_wrong_token_sent() {
             &rust_biguint!(PRICE),
             |sc| sc.buy(STARTING_AUCTION_ID),
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH);
 }
 
 #[test]
@@ -150,7 +150,7 @@ fn buy_fail_wrong_nonce_sent() {
             &rust_biguint!(PRICE),
             |sc| sc.buy(STARTING_AUCTION_ID),
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_NONCE_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH);
 }
 
 #[test]
@@ -228,7 +228,7 @@ fn buy_with_0_egld_amount() {
                 sc.buy(STARTING_AUCTION_ID);
             },
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_AMOUNT_MISMATCH);
 }
 
 fn buy_n_succesfully(quantity: u64) {

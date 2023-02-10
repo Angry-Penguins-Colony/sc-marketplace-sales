@@ -1,6 +1,6 @@
 use apc_sales::{
-    EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_WRONG_NONCE_SENT,
-    ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT, STARTING_AUCTION_ID,
+    EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH,
+    ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::{managed_biguint, rust_biguint};
@@ -148,7 +148,7 @@ fn add_tokens_fails_if_send_wrong_token_identifier() {
             &rust_biguint!(ADDED_QUANTITY),
             |sc| sc.add_token_to_auction(STARTING_AUCTION_ID),
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH);
 }
 
 #[test]
@@ -180,7 +180,7 @@ fn add_tokens_fails_if_send_wrong_token_nonce() {
             &rust_biguint!(ADDED_QUANTITY),
             |sc| sc.add_token_to_auction(STARTING_AUCTION_ID),
         )
-        .assert_user_error(ERR_INVALID_PAYMENT_WRONG_NONCE_SENT);
+        .assert_user_error(ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH);
 }
 
 #[test]
