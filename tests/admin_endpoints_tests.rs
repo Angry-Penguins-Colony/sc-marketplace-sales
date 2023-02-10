@@ -68,8 +68,6 @@ fn retire_token_fails_if_bad_auction_id() {
             |sc| sc.retire_token_from_auction(STARTING_AUCTION_ID, &managed_biguint!(1)),
         )
         .assert_user_error(ERR_INVALID_AUCTION_ID);
-
-    todo!();
 }
 
 #[test]
