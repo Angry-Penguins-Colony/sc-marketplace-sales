@@ -23,3 +23,19 @@ pub struct Auction<M: ManagedTypeApi> {
 
     pub start_timestamp: u64,
 }
+
+#[derive(
+    ManagedVecItem,
+    TopEncode,
+    TopDecode,
+    NestedEncode,
+    NestedDecode,
+    PartialEq,
+    TypeAbi,
+    Clone,
+    Debug,
+)]
+pub struct AuctionStats<M: ManagedTypeApi> {
+    pub auction: Auction<M>,
+    pub remaining_output_items: u64,
+}

@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use auction::Auction;
+use auction::{Auction, AuctionStats};
 
 multiversx_sc::imports!();
 
@@ -144,7 +144,7 @@ pub trait EmptyContract {
     }
 
     #[view(getAuction)]
-    fn get_auction(&self, _id: u64) {
+    fn get_auction(&self, _id: u64) -> AuctionStats<Self::Api> {
         todo!();
     }
 
