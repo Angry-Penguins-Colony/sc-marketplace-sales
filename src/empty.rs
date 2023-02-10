@@ -38,8 +38,8 @@ pub trait EmptyContract {
     #[endpoint(createAuction)]
     fn create_auction(
         &self,
-        output_token_id: EgldOrEsdtTokenIdentifier,
-        output_token_nonce: u64,
+        input_token_id: EgldOrEsdtTokenIdentifier,
+        input_token_nonce: u64,
         price: BigUint,
         start_timestamp: u64,
     ) -> u64 {
@@ -48,11 +48,11 @@ pub trait EmptyContract {
         let new_auction_id = self.next_auction_id().get();
         self.auctions(new_auction_id).set(Auction {
             price,
-            output_token_nonce,
-            output_token_id,
             start_timestamp,
-            input_token_nonce: payments.token_nonce,
-            input_token_id: payments.token_identifier,
+            input_token_id,
+            input_token_nonce,
+            output_token_nonce: payments.token_nonce,
+            output_token_id: payments.token_identifier,
         });
 
         self.next_auction_id().set(new_auction_id + 1);
@@ -98,12 +98,12 @@ pub trait EmptyContract {
         let payment = self.call_value().egld_or_single_esdt();
 
         require!(
-            payment.token_identifier == auction.output_token_id,
+            payment.token_identifier == auction.input_token_id,
             ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT
         );
 
         require!(
-            payment.token_nonce == auction.output_token_nonce,
+            payment.token_nonce == auction.input_token_nonce,
             ERR_INVALID_PAYMENT_WRONG_NONCE_SENT
         );
 
@@ -122,8 +122,8 @@ pub trait EmptyContract {
         // Send nfts
         self.send().direct_esdt(
             &self.blockchain().get_caller(),
-            &auction.input_token_id,
-            auction.input_token_nonce,
+            &auction.output_token_id,
+            auction.output_token_nonce,
             &wanted_buy_amount,
         );
     }
@@ -131,8 +131,8 @@ pub trait EmptyContract {
     fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
         self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
-            &auction.input_token_id,
-            auction.input_token_nonce,
+            &auction.output_token_id,
+            auction.output_token_nonce,
         )
     }
 
