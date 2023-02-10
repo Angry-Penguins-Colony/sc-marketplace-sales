@@ -39,7 +39,8 @@ fn create_auction() {
                     price: managed_biguint!(PRICE),
                     start_timestamp: START_TIMESTAMP,
                     input_token_id: EgldOrEsdtTokenIdentifier::egld(),
-                    input_token_nonce: 0
+                    input_token_nonce: 0,
+                    max_quantity: managed_biguint!(QUANTITY)
                 }
             );
         })

@@ -43,6 +43,7 @@ fn view_get_auction_works() {
                     start_timestamp: START_TIMESTAMP,
                     input_token_id: EgldOrEsdtTokenIdentifier::egld(),
                     input_token_nonce: 0,
+                    max_quantity: managed_biguint!(INITIAL_QUANTITY),
                 },
                 remaining_output_items: managed_biguint!(INITIAL_QUANTITY),
             };

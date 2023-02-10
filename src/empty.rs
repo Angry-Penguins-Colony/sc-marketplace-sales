@@ -50,7 +50,7 @@ pub trait EmptyContract {
 
         require!(price > 0, ERR_CREATE_AUCTION_BAD_PRICE);
 
-        let payments = self.call_value().single_esdt();
+        let payment = self.call_value().single_esdt();
 
         let new_auction_id = self.next_auction_id().get();
         self.auctions(new_auction_id).set(Auction {
@@ -58,8 +58,9 @@ pub trait EmptyContract {
             start_timestamp,
             input_token_id,
             input_token_nonce,
-            output_token_nonce: payments.token_nonce,
-            output_token_id: payments.token_identifier,
+            output_token_nonce: payment.token_nonce,
+            output_token_id: payment.token_identifier,
+            max_quantity: payment.amount,
         });
 
         self.next_auction_id().set(new_auction_id + 1);

@@ -22,6 +22,8 @@ pub struct Auction<M: ManagedTypeApi> {
     pub price: BigUint<M>,
 
     pub start_timestamp: u64,
+
+    pub max_quantity: BigUint<M>,
 }
 
 #[derive(
