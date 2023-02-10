@@ -16,7 +16,6 @@ pub const ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT: &str =
     "The payment is invalid. Wrong amount sent.";
 pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
 pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
-pub const ERR_INVALID_QUANTITY: &str = "Invalid quantity.";
 pub const ERR_CREATE_AUCTION_BAD_EGLD_NONCE: &str =
     "When creating an auction with egld, you must set the nonce to 0.";
 pub const ERR_CREATE_AUCTION_BAD_PRICE: &str = "The price cannot be set to 0";
@@ -88,9 +87,7 @@ pub trait EmptyContract {
 
     #[payable("*")]
     #[endpoint]
-    fn buy(&self, auction_id: u64, quantity: u64) {
-        require!(quantity > 0, ERR_INVALID_QUANTITY);
-
+    fn buy(&self, auction_id: u64) {
         self.require_valid_auction_id(auction_id);
 
         let auction = self.auctions(auction_id).get();
