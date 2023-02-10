@@ -51,8 +51,8 @@ fn create_auction_fails_if_egld_nonce_is_wrong() {
 
     setup.blockchain_wrapper.set_nft_balance(
         &setup.owner_address,
-        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
-        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
+        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+        helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
         &rust_biguint!(5),
         &BoxedBytes::empty(),
     );
@@ -62,8 +62,8 @@ fn create_auction_fails_if_egld_nonce_is_wrong() {
         .execute_esdt_transfer(
             &setup.owner_address,
             &setup.contract_wrapper,
-            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
-            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
+            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+            helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
             &rust_biguint!(0),
             |sc| {
                 sc.create_auction(EgldOrEsdtTokenIdentifier::egld(), 1, managed_biguint!(1), 0);

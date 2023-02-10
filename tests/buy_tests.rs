@@ -284,8 +284,8 @@ fn buy_n_succesfully(quantity: u64) {
     // "The buying user should have receive its SFT"
     setup.blockchain_wrapper.check_nft_balance(
         &setup.user_address,
-        crate::helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
-        crate::helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
+        crate::helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+        crate::helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
         &rust_biguint!(quantity),
         Option::Some(&BoxedBytes::empty()),
     );
