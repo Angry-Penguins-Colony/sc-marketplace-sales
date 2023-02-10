@@ -82,14 +82,14 @@ fn buy_fail_wrong_token_sent() {
     const PRICE: u64 = 50;
     const QUANTITY: u64 = 1;
 
-    const SELL_TOKEN: &[u8] = b"SELL-ffffff";
-    const SELL_NONCE: u64 = 1;
+    const OUTPUT_TOKEN_ID: &[u8] = b"SELL-ffffff";
+    const OUTPUT_TOKEN_NONCE: u64 = 1;
 
     setup.create_default_auction_buyable_in_egld(PRICE, 0, QUANTITY);
     setup.blockchain_wrapper.set_nft_balance(
         &setup.user_address,
-        SELL_TOKEN,
-        SELL_NONCE,
+        OUTPUT_TOKEN_ID,
+        OUTPUT_TOKEN_NONCE,
         &rust_biguint!(PRICE),
         &BoxedBytes::empty(),
     );
@@ -100,8 +100,8 @@ fn buy_fail_wrong_token_sent() {
         .execute_esdt_transfer(
             &setup.user_address,
             &setup.contract_wrapper,
-            SELL_TOKEN,
-            SELL_NONCE,
+            OUTPUT_TOKEN_ID,
+            OUTPUT_TOKEN_NONCE,
             &rust_biguint!(PRICE),
             |sc| sc.buy(STARTING_AUCTION_ID, QUANTITY),
         )
@@ -284,8 +284,8 @@ fn buy_n_succesfully(quantity: u64) {
     // "The buying user should have receive its SFT"
     setup.blockchain_wrapper.check_nft_balance(
         &setup.user_address,
-        crate::helpers::DEFAULT_AUCTION_SELL_TOKEN,
-        crate::helpers::DEFAULT_AUCTION_SELL_NONCE,
+        crate::helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
+        crate::helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
         &rust_biguint!(quantity),
         Option::Some(&BoxedBytes::empty()),
     );

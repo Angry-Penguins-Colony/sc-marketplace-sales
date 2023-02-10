@@ -13,16 +13,16 @@ fn create_auction() {
     const PRICE: u64 = 10;
     const START_TIMESTAMP: u64 = 0;
 
-    const SELL_TOKEN: &[u8] = b"HAT-ffffff";
-    const SELL_NONCE: u64 = 2;
-    const SELL_QUANTITY: u64 = 5;
+    const OUTPUT_TOKEN_ID: &[u8] = b"HAT-ffffff";
+    const OUTPUT_TOKEN_NONCE: u64 = 2;
+    const QUANTITY: u64 = 5;
 
     setup.create_auction_buyable_in_egld(
-        SELL_TOKEN,
-        SELL_NONCE,
+        OUTPUT_TOKEN_ID,
+        OUTPUT_TOKEN_NONCE,
         PRICE,
         START_TIMESTAMP,
-        SELL_QUANTITY,
+        QUANTITY,
     );
 
     setup
@@ -37,8 +37,8 @@ fn create_auction() {
                     output_token_nonce: 0,
                     price: managed_biguint!(PRICE),
                     start_timestamp: START_TIMESTAMP,
-                    input_token_id: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
-                    input_token_nonce: SELL_NONCE
+                    input_token_id: TokenIdentifier::<DebugApi>::from_esdt_bytes(OUTPUT_TOKEN_ID),
+                    input_token_nonce: OUTPUT_TOKEN_NONCE
                 }
             );
         })
@@ -51,8 +51,8 @@ fn create_auction_fails_if_egld_nonce_is_wrong() {
 
     setup.blockchain_wrapper.set_nft_balance(
         &setup.owner_address,
-        helpers::DEFAULT_AUCTION_SELL_TOKEN,
-        helpers::DEFAULT_AUCTION_SELL_NONCE,
+        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
+        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
         &rust_biguint!(5),
         &BoxedBytes::empty(),
     );
@@ -62,8 +62,8 @@ fn create_auction_fails_if_egld_nonce_is_wrong() {
         .execute_esdt_transfer(
             &setup.owner_address,
             &setup.contract_wrapper,
-            helpers::DEFAULT_AUCTION_SELL_TOKEN,
-            helpers::DEFAULT_AUCTION_SELL_NONCE,
+            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_ID,
+            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN_NONCE,
             &rust_biguint!(0),
             |sc| {
                 sc.create_auction(EgldOrEsdtTokenIdentifier::egld(), 1, managed_biguint!(1), 0);
