@@ -138,11 +138,6 @@ pub trait EmptyContract {
         };
     }
 
-    #[view(getActiveAuctions)]
-    fn get_active_auctions(&self) {
-        todo!();
-    }
-
     fn require_valid_auction_id(&self, auction_id: u64) {
         require!(
             !self.auctions(auction_id).is_empty(),
