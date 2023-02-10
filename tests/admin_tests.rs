@@ -15,7 +15,7 @@ fn create_auction() {
     const SELL_NONCE: u64 = 2;
     const SELL_QUANTITY: u64 = 5;
 
-    setup.create_auction(
+    setup.create_auction_buyable_in_egld(
         SELL_TOKEN,
         SELL_NONCE,
         PRICE,

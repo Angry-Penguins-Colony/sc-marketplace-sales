@@ -1,6 +1,8 @@
 use apc_sales::*;
 use multiversx_sc::types::{Address, BoxedBytes, EgldOrEsdtTokenIdentifier};
-use multiversx_sc_scenario::{managed_biguint, rust_biguint, testing_framework::*, DebugApi};
+use multiversx_sc_scenario::{
+    managed_biguint, managed_token_id_wrapped, rust_biguint, testing_framework::*, DebugApi,
+};
 
 const WASM_PATH: &str = "output/apc_sales.wasm";
 
@@ -21,8 +23,13 @@ impl<ContractObjBuilder> ContractSetup<ContractObjBuilder>
 where
     ContractObjBuilder: 'static + Copy + Fn() -> apc_sales::ContractObj<DebugApi>,
 {
-    pub fn create_default_auction(&mut self, price: u64, start_timestamp: u64, quantity: u64) {
-        self.create_auction(
+    pub fn create_default_auction_buyable_in_egld(
+        &mut self,
+        price: u64,
+        start_timestamp: u64,
+        quantity: u64,
+    ) {
+        self.create_auction_buyable_in_egld(
             DEFAULT_AUCTION_SELL_TOKEN,
             DEFAULT_AUCTION_SELL_NONCE,
             price,
@@ -31,7 +38,7 @@ where
         );
     }
 
-    pub fn create_auction(
+    pub fn create_auction_buyable_in_egld(
         &mut self,
         sell_token: &[u8],
         sell_nonce: u64,
@@ -58,6 +65,43 @@ where
                     let _ = sc.create_auction(
                         EgldOrEsdtTokenIdentifier::egld(),
                         0,
+                        managed_biguint!(price),
+                        start_timestamp,
+                    );
+                },
+            )
+            .assert_ok();
+    }
+
+    pub fn create_auction_buyable_in_esdt(
+        &mut self,
+        price_token_id: &[u8],
+        price_token_nonce: u64,
+        sell_token: &[u8],
+        sell_nonce: u64,
+        price: u64,
+        start_timestamp: u64,
+        quantity: u64,
+    ) {
+        self.blockchain_wrapper.set_nft_balance(
+            &self.owner_address,
+            sell_token,
+            sell_nonce,
+            &rust_biguint!(quantity),
+            &BoxedBytes::empty(),
+        );
+
+        self.blockchain_wrapper
+            .execute_esdt_transfer(
+                &self.owner_address,
+                &self.contract_wrapper,
+                sell_token,
+                sell_nonce,
+                &rust_biguint!(1),
+                |sc| {
+                    let _ = sc.create_auction(
+                        managed_token_id_wrapped!(price_token_id),
+                        price_token_nonce,
                         managed_biguint!(price),
                         start_timestamp,
                     );

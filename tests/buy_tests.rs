@@ -1,5 +1,5 @@
 use apc_sales::{
-    EmptyContract, ERR_BUYING_UNEXISTING_AUCTION, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
+    EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT,
     ERR_INVALID_PAYMENT_WRONG_NONCE_SENT, ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT,
     ERR_NOT_ENOUGHT_ITEMS, ERR_SALE_IS_NOT_OPENED_YET, STARTING_AUCTION_ID,
 };
@@ -27,7 +27,7 @@ fn buy_fail_if_locked() {
     const START_TIMESTAMP: u64 = 10;
     const NOW_TIMESTAMP: u64 = 5;
 
-    setup.create_default_auction(PRICE, START_TIMESTAMP, QUANTITY);
+    setup.create_default_auction_buyable_in_egld(PRICE, START_TIMESTAMP, QUANTITY);
     setup
         .blockchain_wrapper
         .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * QUANTITY));
@@ -51,20 +51,22 @@ fn buy_fail_if_locked() {
 fn buy_fail_wrong_amount_sent() {
     let mut setup = helpers::setup_contract(apc_sales::contract_obj);
 
-    const EXPECTED_PRICE: u64 = 50;
-    const SEND_PRICE: u64 = EXPECTED_PRICE / 2;
-    const QUANTITY: u64 = 1;
+    const PRICE: u64 = 50;
+    const EXPECTED_QUANTITY: u64 = 1;
+    const SENT_QUANTITY: u64 = 2;
 
-    setup.create_default_auction(EXPECTED_PRICE, 0, QUANTITY);
+    assert_ne!(EXPECTED_QUANTITY, SENT_QUANTITY);
+
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, 100);
 
     setup
         .blockchain_wrapper
         .execute_tx(
             &setup.user_address,
             &setup.contract_wrapper,
-            &rust_biguint!(SEND_PRICE),
+            &rust_biguint!(PRICE * SENT_QUANTITY),
             |sc| {
-                sc.buy(STARTING_AUCTION_ID, QUANTITY);
+                sc.buy(STARTING_AUCTION_ID, EXPECTED_QUANTITY);
             },
         )
         .assert_user_error(ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT);
@@ -80,7 +82,7 @@ fn buy_fail_wrong_token_sent() {
     const SELL_TOKEN: &[u8] = b"SELL-ffffff";
     const SELL_NONCE: u64 = 1;
 
-    setup.create_default_auction(PRICE, 0, QUANTITY);
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, QUANTITY);
     setup.blockchain_wrapper.set_nft_balance(
         &setup.user_address,
         SELL_TOKEN,
@@ -89,6 +91,7 @@ fn buy_fail_wrong_token_sent() {
         &BoxedBytes::empty(),
     );
 
+    // should receive egld, but receive esdt
     setup
         .blockchain_wrapper
         .execute_esdt_transfer(
@@ -109,16 +112,27 @@ fn buy_fail_wrong_nonce_sent() {
     const PRICE: u64 = 50;
     const QUANTITY: u64 = 1;
 
-    const SELL_TOKEN: &[u8] = b"SELL-ffffff";
+    const MONEY_TOKEN: &[u8] = b"MONEY-aaaaaa";
+    const MONEY_NONCE_EXPECTED: u64 = 1;
+    const MONEY_NONCE_SENT: u64 = 2;
 
-    const SELL_NONCE_SENT: u64 = 1;
-    const SELL_NONCE_EXPECTED: u64 = 2;
+    const BUYABLE_TOKEN: &[u8] = b"SELL-ffffff";
+    const BUYABLE_NONCE: u64 = 1;
 
-    setup.create_auction(SELL_TOKEN, SELL_NONCE_EXPECTED, PRICE, 0, QUANTITY);
+    setup.create_auction_buyable_in_esdt(
+        MONEY_TOKEN,
+        MONEY_NONCE_EXPECTED,
+        BUYABLE_TOKEN,
+        BUYABLE_NONCE,
+        PRICE,
+        0,
+        QUANTITY,
+    );
+
     setup.blockchain_wrapper.set_nft_balance(
         &setup.user_address,
-        SELL_TOKEN,
-        SELL_NONCE_SENT,
+        MONEY_TOKEN,
+        MONEY_NONCE_SENT,
         &rust_biguint!(PRICE),
         &BoxedBytes::empty(),
     );
@@ -128,8 +142,8 @@ fn buy_fail_wrong_nonce_sent() {
         .execute_esdt_transfer(
             &setup.user_address,
             &setup.contract_wrapper,
-            SELL_TOKEN,
-            SELL_NONCE_SENT,
+            MONEY_TOKEN,
+            MONEY_NONCE_SENT,
             &rust_biguint!(PRICE),
             |sc| sc.buy(STARTING_AUCTION_ID, QUANTITY),
         )
@@ -146,7 +160,7 @@ fn buy_fail_if_not_enough_quantity_remaining() {
 
     assert_eq!(BUY_QUANTITY > AVAILABLE_QUANTITY, true);
 
-    setup.create_default_auction(PRICE, 0, AVAILABLE_QUANTITY);
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, AVAILABLE_QUANTITY);
     setup
         .blockchain_wrapper
         .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * BUY_QUANTITY));
@@ -172,7 +186,7 @@ fn buy_fails_if_unexisting_auction() {
     const PRICE: u64 = 50;
     const UNEXISTING_AUCTION_ID: u64 = STARTING_AUCTION_ID + 1;
 
-    setup.create_default_auction(PRICE, 0, 1);
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, 1);
     setup
         .blockchain_wrapper
         .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * 1));
@@ -188,7 +202,7 @@ fn buy_fails_if_unexisting_auction() {
                 sc.buy(UNEXISTING_AUCTION_ID, 1);
             },
         )
-        .assert_user_error(ERR_BUYING_UNEXISTING_AUCTION);
+        .assert_user_error(ERR_INVALID_AUCTION_ID);
 }
 
 fn buy_n_succesfully(quantity: u64) {
@@ -196,7 +210,7 @@ fn buy_n_succesfully(quantity: u64) {
 
     const PRICE: u64 = 50;
 
-    setup.create_default_auction(PRICE, 0, quantity);
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, quantity);
     setup
         .blockchain_wrapper
         .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * quantity));

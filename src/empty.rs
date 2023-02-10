@@ -15,7 +15,7 @@ pub const ERR_INVALID_PAYMENT_WRONG_NONCE_SENT: &str = "The payment is invalid. 
 pub const ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT: &str =
     "The payment is invalid. Wrong amount sent.";
 pub const ERR_NOT_ENOUGHT_ITEMS: &str = "Cannot fulfill your order. Try to buy less items.";
-pub const ERR_BUYING_UNEXISTING_AUCTION: &str = "Auction ID invalid.";
+pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {
@@ -77,13 +77,52 @@ pub trait EmptyContract {
 
     #[payable("*")]
     #[endpoint]
-    fn buy(&self, _id: u64, _quantity: u64) {
+    fn buy(&self, auction_id: u64, _quantity: u64) {
         require!(
-            !self.auctions(_id).is_empty(),
-            ERR_BUYING_UNEXISTING_AUCTION
+            !self.auctions(auction_id).is_empty(),
+            ERR_INVALID_AUCTION_ID
+        );
+
+        let auction = self.auctions(auction_id).get();
+
+        require!(
+            self.blockchain().get_block_timestamp() >= auction.start_timestamp,
+            ERR_SALE_IS_NOT_OPENED_YET
+        );
+
+        let payment = self.call_value().single_esdt();
+
+        require!(
+            payment.token_identifier == auction.price_token_identifier,
+            ERR_INVALID_PAYMENT_WRONG_TOKEN_SENT
+        );
+
+        require!(
+            payment.token_nonce == auction.price_token_nonce,
+            ERR_INVALID_PAYMENT_WRONG_NONCE_SENT
+        );
+
+        require!(
+            &payment.amount % &auction.price == 0,
+            ERR_INVALID_PAYMENT_WRONG_AMOUNT_SENT
+        );
+
+        let wanted_buy_amount = payment.amount / &auction.price;
+
+        require!(
+            self.get_remaining_amount(auction) >= wanted_buy_amount,
+            ERR_NOT_ENOUGHT_ITEMS
         );
 
         todo!();
+    }
+
+    fn get_remaining_amount(&self, auction: Auction<Self::Api>) -> BigUint<Self::Api> {
+        self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &auction.sell_token,
+            auction.sell_nonce,
+        )
     }
 
     #[view(getAuction)]
