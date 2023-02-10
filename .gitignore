@@ -8,3 +8,5 @@
 
 *Zone.Identifier*
 mxpy-up.py
+/wallets/
+*.pem
