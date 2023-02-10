@@ -13,10 +13,13 @@ multiversx_sc::derive_imports!();
     Debug,
 )]
 pub struct Auction<M: ManagedTypeApi> {
-    pub sell_token: TokenIdentifier<M>,
-    pub sell_nonce: u64,
-    pub price_token_identifier: EgldOrEsdtTokenIdentifier<M>,
-    pub price_token_nonce: u64,
+    pub input_token_id: TokenIdentifier<M>,
+    pub input_token_nonce: u64,
+    pub output_token_id: EgldOrEsdtTokenIdentifier<M>,
+    pub output_token_nonce: u64,
+
+    /** aka input amount for one output */
     pub price: BigUint<M>,
+
     pub start_timestamp: u64,
 }

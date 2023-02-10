@@ -31,12 +31,12 @@ fn create_auction() {
             assert_eq!(
                 sc.auctions(STARTING_AUCTION_ID).get(),
                 Auction {
-                    price_token_identifier: EgldOrEsdtTokenIdentifier::egld(),
-                    price_token_nonce: 0,
+                    output_token_id: EgldOrEsdtTokenIdentifier::egld(),
+                    output_token_nonce: 0,
                     price: managed_biguint!(PRICE),
                     start_timestamp: START_TIMESTAMP,
-                    sell_token: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
-                    sell_nonce: SELL_NONCE
+                    input_token_id: TokenIdentifier::<DebugApi>::from_esdt_bytes(SELL_TOKEN),
+                    input_token_nonce: SELL_NONCE
                 }
             );
         })
