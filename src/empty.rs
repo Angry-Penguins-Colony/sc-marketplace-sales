@@ -144,8 +144,19 @@ pub trait EmptyContract {
     }
 
     #[view(getAuction)]
-    fn get_auction(&self, _id: u64) -> AuctionStats<Self::Api> {
-        todo!();
+    fn get_auction(&self, id: u64) -> AuctionStats<Self::Api> {
+        require!(
+            self.auctions(id).is_empty() == false,
+            ERR_INVALID_AUCTION_ID,
+        );
+
+        let auction = self.auctions(id).get();
+        let remaining_output_items = self.get_remaining_amount(&auction);
+
+        return AuctionStats {
+            auction,
+            remaining_output_items,
+        };
     }
 
     #[view(getActiveAuctions)]

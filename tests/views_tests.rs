@@ -4,7 +4,7 @@ use apc_sales::{
     EmptyContract, ERR_INVALID_AUCTION_ID, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::{EgldOrEsdtTokenIdentifier, TokenIdentifier};
-use multiversx_sc_scenario::{managed_biguint, rust_biguint, DebugApi};
+use multiversx_sc_scenario::{managed_biguint, DebugApi};
 
 #[test]
 fn view_get_auction_fail_if_invalid_id() {
@@ -44,7 +44,7 @@ fn view_get_auction_works() {
                     input_token_id: EgldOrEsdtTokenIdentifier::egld(),
                     input_token_nonce: 0,
                 },
-                remaining_output_items: INITIAL_QUANTITY,
+                remaining_output_items: managed_biguint!(INITIAL_QUANTITY),
             };
 
             assert_eq!(actual_auction_stats, expected_auction_stats);
