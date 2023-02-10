@@ -19,6 +19,7 @@ pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
 pub const ERR_INVALID_QUANTITY: &str = "Invalid quantity.";
 pub const ERR_CREATE_AUCTION_BAD_EGLD_NONCE: &str =
     "When creating an auction with egld, you must set the nonce to 0.";
+pub const ERR_CREATE_AUCTION_BAD_PRICE: &str = "The price cannot be set to 0";
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {
@@ -46,6 +47,8 @@ pub trait EmptyContract {
         if input_token_id.is_egld() {
             require!(input_token_nonce == 0, ERR_CREATE_AUCTION_BAD_EGLD_NONCE);
         }
+
+        require!(price > 0, ERR_CREATE_AUCTION_BAD_PRICE);
 
         let payments = self.call_value().single_esdt();
 

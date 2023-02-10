@@ -1,5 +1,6 @@
 use apc_sales::{
-    auction::Auction, EmptyContract, ERR_CREATE_AUCTION_BAD_EGLD_NONCE, STARTING_AUCTION_ID,
+    auction::Auction, EmptyContract, ERR_CREATE_AUCTION_BAD_EGLD_NONCE,
+    ERR_CREATE_AUCTION_BAD_PRICE, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::{BoxedBytes, EgldOrEsdtTokenIdentifier, TokenIdentifier};
 use multiversx_sc_scenario::{managed_biguint, rust_biguint, DebugApi};
@@ -70,4 +71,31 @@ fn create_auction_fails_if_egld_nonce_is_wrong() {
             },
         )
         .assert_user_error(ERR_CREATE_AUCTION_BAD_EGLD_NONCE);
+}
+
+#[test]
+fn create_auction_fails_if_price_equals_0() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.owner_address,
+        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+        helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
+        &rust_biguint!(5),
+        &BoxedBytes::empty(),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_esdt_transfer(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+            helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
+            &rust_biguint!(0),
+            |sc| {
+                sc.create_auction(EgldOrEsdtTokenIdentifier::egld(), 0, managed_biguint!(0), 0);
+            },
+        )
+        .assert_user_error(ERR_CREATE_AUCTION_BAD_PRICE);
 }
