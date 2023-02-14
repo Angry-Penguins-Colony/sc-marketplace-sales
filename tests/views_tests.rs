@@ -46,6 +46,7 @@ fn view_get_auction_works() {
                     max_quantity: managed_biguint!(INITIAL_QUANTITY),
                 },
                 remaining_output_items: managed_biguint!(INITIAL_QUANTITY),
+                id: STARTING_AUCTION_ID,
             };
 
             assert_eq!(actual_auction_stats, expected_auction_stats);

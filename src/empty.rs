@@ -207,6 +207,7 @@ pub trait EmptyContract {
         return AuctionStats {
             auction,
             remaining_output_items,
+            id: auction_id,
         };
     }
 

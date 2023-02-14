@@ -40,4 +40,5 @@ pub struct Auction<M: ManagedTypeApi> {
 pub struct AuctionStats<M: ManagedTypeApi> {
     pub auction: Auction<M>,
     pub remaining_output_items: BigUint<M>,
+    pub id: u64,
 }
