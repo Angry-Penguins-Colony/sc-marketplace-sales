@@ -33,7 +33,9 @@ pub trait EmptyContract {
 
     #[init]
     fn init(&self) {
-        self.next_auction_id().set(STARTING_AUCTION_ID);
+        if self.next_auction_id().is_empty() {
+            self.next_auction_id().set(STARTING_AUCTION_ID);
+        }
     }
 
     #[only_owner]

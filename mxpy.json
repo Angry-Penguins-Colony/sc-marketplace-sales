@@ -9,6 +9,19 @@
             "pem": "wallets/erd1rvl2daxdch2xgwd7n6sewjnxg7zu57y0yv82qg6794d4f4qtvqhsxnqfmj.pem",
             "gas-limit": 600000000,
             "send": true
+        },
+        "upgrade": {
+            "proxy": "https://devnet-gateway.elrond.com",
+            "chain": "D",
+            "verbose": true,
+            "bytecode": "output/apc_sales.wasm",
+            "recall-nonce": true,
+            "pem": "wallets/erd1rvl2daxdch2xgwd7n6sewjnxg7zu57y0yv82qg6794d4f4qtvqhsxnqfmj.pem",
+            "gas-limit": 600000000,
+            "send": true,
+            "arguments": [
+                "0x04"
+            ]
         }
     }
 }
