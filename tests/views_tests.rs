@@ -4,7 +4,9 @@ use apc_sales::{
     EmptyContract, ERR_INVALID_AUCTION_ID, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::{EgldOrEsdtTokenIdentifier, TokenIdentifier};
-use multiversx_sc_scenario::{managed_biguint, DebugApi};
+use multiversx_sc_scenario::{
+    managed_biguint, managed_token_id, managed_token_id_wrapped, DebugApi,
+};
 
 #[test]
 fn view_get_auction_fail_if_invalid_id() {
@@ -50,6 +52,84 @@ fn view_get_auction_works() {
             };
 
             assert_eq!(actual_auction_stats, expected_auction_stats);
+        })
+        .assert_ok();
+}
+
+struct UnmanagedAuction<'a> {
+    input_token_id: &'a [u8],
+    input_token_nonce: u64,
+    output_token_id: &'a [u8],
+    output_token_nonce: u64,
+    price: u64,
+    start_timestamp: u64,
+    quantity: u64,
+}
+
+#[test]
+fn view_get_all_auctions_works() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    let expected_auctions = [
+        UnmanagedAuction {
+            input_token_id: b"INPUT-aaaaaa",
+            input_token_nonce: 1,
+            output_token_id: b"OUTPUT-aaaaaa",
+            output_token_nonce: 1,
+            price: 5u64,
+            start_timestamp: 5000,
+            quantity: 100,
+        },
+        UnmanagedAuction {
+            input_token_id: b"ICE-ffffff",
+            input_token_nonce: 1,
+            output_token_id: b"PENG-ffffff",
+            output_token_nonce: 564,
+            price: 100u64,
+            start_timestamp: 150000,
+            quantity: 200,
+        },
+    ];
+
+    for auction in expected_auctions.iter() {
+        setup.create_auction_buyable_in_esdt(
+            auction.input_token_id,
+            auction.input_token_nonce,
+            auction.output_token_id,
+            auction.output_token_nonce,
+            auction.price,
+            auction.start_timestamp,
+            auction.quantity,
+        )
+    }
+
+    setup
+        .blockchain_wrapper
+        .execute_query(&setup.contract_wrapper, |sc| {
+            let actual_auctions = sc.get_all_auctions_stats();
+
+            assert_eq!(actual_auctions.len(), expected_auctions.len());
+
+            for index in 0..actual_auctions.len() {
+                let actual_auction_stats = actual_auctions.get(index);
+                let expected_auction = &expected_auctions[index];
+
+                let expected_auction_stats = AuctionStats {
+                    auction: Auction {
+                        input_token_id: managed_token_id_wrapped!(expected_auction.input_token_id),
+                        input_token_nonce: expected_auction.input_token_nonce,
+                        output_token_id: managed_token_id!(expected_auction.output_token_id),
+                        output_token_nonce: expected_auction.output_token_nonce,
+                        max_quantity: managed_biguint!(expected_auction.quantity),
+                        price: managed_biguint!(expected_auction.price),
+                        start_timestamp: expected_auction.start_timestamp,
+                    },
+                    id: index as u64 + 1,
+                    remaining_output_items: managed_biguint!(expected_auction.quantity),
+                };
+
+                assert_eq!(actual_auction_stats, expected_auction_stats);
+            }
         })
         .assert_ok();
 }

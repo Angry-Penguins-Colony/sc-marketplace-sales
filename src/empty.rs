@@ -211,6 +211,19 @@ pub trait EmptyContract {
         };
     }
 
+    #[view(getAllAuctionStats)]
+    fn get_all_auctions_stats(&self) -> ManagedVec<Self::Api, AuctionStats<Self::Api>> {
+        let mut all_auctions = ManagedVec::new();
+
+        for auction_id in STARTING_AUCTION_ID..self.next_auction_id().get() {
+            let auction = self.get_auction_stats(auction_id);
+
+            all_auctions.push(auction);
+        }
+
+        return all_auctions;
+    }
+
     fn get_remaining_amount(&self, auction: &Auction<Self::Api>) -> BigUint<Self::Api> {
         self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),

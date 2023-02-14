@@ -97,7 +97,7 @@ where
                 &self.contract_wrapper,
                 output_token_id,
                 output_token_nonce,
-                &rust_biguint!(1),
+                &rust_biguint!(quantity),
                 |sc| {
                     let _ = sc.create_auction(
                         managed_token_id_wrapped!(input_token_id),
