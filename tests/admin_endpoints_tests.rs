@@ -377,3 +377,76 @@ fn withdraw_works_with_esdt() {
         Option::Some(&BoxedBytes::empty()),
     );
 }
+
+#[test]
+fn hide_auction_works() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const PRICE: u64 = 1;
+    const BUY_QUANTITY: u64 = 1;
+
+    setup.create_default_auction_buyable_in_egld(1, 0, INITIAL_QUANTITY);
+
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * BUY_QUANTITY));
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(PRICE * BUY_QUANTITY),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| sc.hide_auction(STARTING_AUCTION_ID),
+        )
+        .assert_ok();
+
+    // assert max_quantity == 0
+    setup
+        .blockchain_wrapper
+        .execute_query(&setup.contract_wrapper, |sc| {
+            let auction_stats = sc.get_auction_stats(STARTING_AUCTION_ID);
+
+            assert_eq!(
+                auction_stats.auction.max_quantity, 0,
+                "The max quantity should be 0"
+            );
+        })
+        .assert_ok();
+
+    setup.blockchain_wrapper.check_nft_balance(
+        &setup.owner_address,
+        helpers::DEFAULT_AUCTION_OUTPUT_TOKEN,
+        helpers::DEFAULT_AUCTION_OUTPUT_NONCE,
+        &rust_biguint!(INITIAL_QUANTITY - BUY_QUANTITY),
+        Option::Some(&BoxedBytes::empty()),
+    );
+}
+
+#[test]
+fn hide_fails_if_wrong_auction_id() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| sc.hide_auction(STARTING_AUCTION_ID),
+        )
+        .assert_user_error(ERR_INVALID_AUCTION_ID);
+}

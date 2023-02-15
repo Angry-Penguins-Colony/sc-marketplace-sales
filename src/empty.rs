@@ -161,8 +161,14 @@ pub trait EmptyContract {
 
     #[only_owner]
     #[endpoint(hideAuction)]
-    fn hide_auction(&self, _auction_id: u64) {
-        todo!();
+    fn hide_auction(&self, auction_id: u64) {
+        let mut auction = self.get_auction(auction_id);
+
+        self.retire_token_from_auction(auction_id, &auction.current_quantity);
+
+        auction.max_quantity = BigUint::from(0u64);
+
+        self.auctions(auction_id).set(auction);
     }
 
     #[payable("*")]
