@@ -450,3 +450,155 @@ fn hide_fails_if_wrong_auction_id() {
         )
         .assert_user_error(ERR_INVALID_AUCTION_ID);
 }
+
+#[test]
+fn withdraw_esdt_do_not_exceed() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const EXCEED_QUANTITY: u64 = 20;
+    const PRICE: u64 = 1;
+
+    const INPUT_TOKEN_ID: &[u8] = b"INPUT-aaaaaa";
+    const INPUT_TOKEN_NONCE: u64 = 1;
+
+    const OUTPUT_TOKEN_ID: &[u8] = b"OUTPUT-ffffff";
+    const OUTPUT_TOKEN_NONCE: u64 = 1;
+
+    setup.create_auction_buyable_in_esdt(
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        OUTPUT_TOKEN_ID,
+        OUTPUT_TOKEN_NONCE,
+        PRICE,
+        0,
+        INITIAL_QUANTITY,
+    );
+
+    // make exceed output quantity
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.contract_wrapper.address_ref(),
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(EXCEED_QUANTITY),
+        &BoxedBytes::empty(),
+    );
+
+    // 2. the user buy
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.user_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(PRICE),
+        &BoxedBytes::empty(),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_esdt_transfer(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            INPUT_TOKEN_ID,
+            INPUT_TOKEN_NONCE,
+            &rust_biguint!(PRICE),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    // 3. withdraw
+    setup.blockchain_wrapper.check_nft_balance(
+        &setup.owner_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(0),
+        Option::Some(&BoxedBytes::empty()),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.withdraw_balance();
+            },
+        )
+        .assert_ok();
+
+    // 4. assert eq
+    setup.blockchain_wrapper.check_nft_balance(
+        &setup.owner_address,
+        INPUT_TOKEN_ID,
+        INPUT_TOKEN_NONCE,
+        &rust_biguint!(PRICE),
+        Option::Some(&BoxedBytes::empty()),
+    );
+}
+
+/**
+ * Withdraw takes all the ""input" tokens on the wallet.
+ * It is an unwanted behaviour when an input token is also an output token.
+ * It would bypass retireTokens and therefore break everything.
+ */
+#[test]
+fn withdraw_egld_do_not_exceed() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const PRICE: u64 = 1;
+    const EXCEED_EGLD: u64 = 5;
+
+    setup.create_default_auction_buyable_in_egld(PRICE, 0, INITIAL_QUANTITY);
+
+    // 1. user buy
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE));
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(PRICE),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    setup.blockchain_wrapper.set_egld_balance(
+        &setup.contract_wrapper.address_ref(),
+        &rust_biguint!(PRICE + EXCEED_EGLD),
+    );
+
+    setup
+        .blockchain_wrapper
+        .check_egld_balance(&setup.owner_address, &rust_biguint!(0));
+
+    // 2. call withdraw
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.withdraw_balance();
+            },
+        )
+        .assert_ok();
+
+    // 3. assert balance
+    setup
+        .blockchain_wrapper
+        .check_egld_balance(&setup.owner_address, &rust_biguint!(PRICE));
+
+    setup.blockchain_wrapper.check_egld_balance(
+        &setup.contract_wrapper.address_ref(),
+        &rust_biguint!(EXCEED_EGLD),
+    );
+}

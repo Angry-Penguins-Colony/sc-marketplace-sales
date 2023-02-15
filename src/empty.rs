@@ -125,34 +125,13 @@ pub trait EmptyContract {
     fn withdraw_balance(&self) {
         let caller = self.blockchain().get_caller();
 
-        // 1. send all EGLD balance
-        self.send().direct_egld(
-            &caller,
-            &self
-                .blockchain()
-                .get_balance(&self.blockchain().get_sc_address()),
-        );
-
-        // 2. send ESDTs
         for auction_id in 1..self.next_auction_id().get() {
             let auction = self.get_auction(auction_id);
+            let amount = (auction.max_quantity - auction.current_quantity) * auction.price;
 
-            if auction.input_token_id.is_egld() {
-                // skipping egld because we already send it
-                continue;
-            }
-
-            let input_token_id_esdt = auction.input_token_id.unwrap_esdt();
-
-            let amount = self.blockchain().get_esdt_balance(
-                &self.blockchain().get_sc_address(),
-                &input_token_id_esdt,
-                auction.input_token_nonce,
-            );
-
-            self.send().direct_esdt(
+            self.send().direct(
                 &caller,
-                &input_token_id_esdt,
+                &auction.input_token_id,
                 auction.input_token_nonce,
                 &amount,
             );
