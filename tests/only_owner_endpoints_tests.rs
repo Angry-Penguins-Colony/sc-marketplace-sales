@@ -72,3 +72,20 @@ fn withdraw_balance() {
         )
         .assert_user_error(ONLY_OWNER_ERR_MESSAGE);
 }
+
+#[test]
+fn hide_auction_forbidden() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.call_hide_auction();
+            },
+        )
+        .assert_user_error(ONLY_OWNER_ERR_MESSAGE);
+}

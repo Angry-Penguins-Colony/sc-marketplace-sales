@@ -159,6 +159,12 @@ pub trait EmptyContract {
         }
     }
 
+    #[only_owner]
+    #[endpoint(hideAuction)]
+    fn hide_auction(&self, _auction_id: u64) {
+        todo!();
+    }
+
     #[payable("*")]
     #[endpoint]
     fn buy(&self, auction_id: u64) {
