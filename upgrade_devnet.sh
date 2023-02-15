@@ -1,1 +1,1 @@
-mxpy contract build && mxpy contract upgrade erd1qqqqqqqqqqqqqpgq6kf8e66fymlyn7tm8m85zgwpym3p902xvqhslax9hf
+mxpy contract build && mxpy contract upgrade erd1qqqqqqqqqqqqqpgqptm77fvhnmfn73ehdgejhh647xfls57nsdvs9r0ecu

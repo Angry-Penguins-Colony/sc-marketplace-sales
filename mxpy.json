@@ -6,7 +6,7 @@
             "verbose": true,
             "bytecode": "output/apc_sales.wasm",
             "recall-nonce": true,
-            "pem": "wallets/erd1rvl2daxdch2xgwd7n6sewjnxg7zu57y0yv82qg6794d4f4qtvqhsxnqfmj.pem",
+            "pem": "wallets/erd1pg0mruhqdggrad3mjh7xe9e9wrxt8vtuehz08tzww8v6cmftsdvs9d2gh8.pem",
             "gas-limit": 600000000,
             "send": true
         },
@@ -16,7 +16,7 @@
             "verbose": true,
             "bytecode": "output/apc_sales.wasm",
             "recall-nonce": true,
-            "pem": "wallets/erd1rvl2daxdch2xgwd7n6sewjnxg7zu57y0yv82qg6794d4f4qtvqhsxnqfmj.pem",
+            "pem": "wallets/erd1pg0mruhqdggrad3mjh7xe9e9wrxt8vtuehz08tzww8v6cmftsdvs9d2gh8.pem",
             "gas-limit": 600000000,
             "send": true
         }
