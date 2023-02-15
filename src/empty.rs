@@ -21,6 +21,7 @@ pub const ERR_INVALID_AUCTION_ID: &str = "Auction ID invalid.";
 pub const ERR_CREATE_AUCTION_BAD_EGLD_NONCE: &str =
     "When creating an auction with egld, you must set the nonce to 0.";
 pub const ERR_CREATE_AUCTION_BAD_PRICE: &str = "The price cannot be set to 0";
+pub const ERR_RETIRING_TOO_MUCH_TOKENS: &str = "Can't retire more items than the auction has.";
 
 #[multiversx_sc::contract]
 pub trait EmptyContract {
@@ -99,12 +100,15 @@ pub trait EmptyContract {
     #[only_owner]
     #[endpoint(retireTokenFromAuction)]
     fn retire_token_from_auction(&self, auction_id: u64, amount: &BigUint<Self::Api>) {
-        let caller = self.blockchain().get_caller();
-
         let mut auction = self.get_auction(auction_id);
 
+        require!(
+            amount <= &auction.current_quantity,
+            ERR_RETIRING_TOO_MUCH_TOKENS
+        );
+
         self.send().direct_esdt(
-            &caller,
+            &self.blockchain().get_caller(),
             &auction.output_token_id,
             auction.output_token_nonce,
             amount,

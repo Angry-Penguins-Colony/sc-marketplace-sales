@@ -1,6 +1,6 @@
 use apc_sales::{
     EmptyContract, ERR_INVALID_AUCTION_ID, ERR_INVALID_PAYMENT_TOKEN_IDENTIFIER_MISMATCH,
-    ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH, STARTING_AUCTION_ID,
+    ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH, ERR_RETIRING_TOO_MUCH_TOKENS, STARTING_AUCTION_ID,
 };
 use multiversx_sc::types::BoxedBytes;
 use multiversx_sc_scenario::{managed_biguint, rust_biguint};
@@ -71,6 +71,48 @@ fn retire_token_fails_if_bad_auction_id() {
             |sc| sc.retire_token_from_auction(STARTING_AUCTION_ID, &managed_biguint!(1)),
         )
         .assert_user_error(ERR_INVALID_AUCTION_ID);
+}
+
+#[test]
+fn retire_tokens_fail_if_too_much_tokens() {
+    let mut setup = helpers::setup_contract(apc_sales::contract_obj);
+
+    const INITIAL_QUANTITY: u64 = 100;
+    const PRICE: u64 = 1;
+    const BUY_QUANTITY: u64 = 1;
+
+    setup.create_default_auction_buyable_in_egld(1, 0, INITIAL_QUANTITY);
+
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.user_address, &rust_biguint!(PRICE * BUY_QUANTITY));
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.user_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(PRICE * BUY_QUANTITY),
+            |sc| {
+                sc.buy(STARTING_AUCTION_ID);
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.retire_token_from_auction(
+                    STARTING_AUCTION_ID,
+                    &managed_biguint!(INITIAL_QUANTITY),
+                )
+            },
+        )
+        .assert_user_error(ERR_RETIRING_TOO_MUCH_TOKENS);
 }
 
 #[test]
