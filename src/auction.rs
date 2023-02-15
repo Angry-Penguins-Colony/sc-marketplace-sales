@@ -23,6 +23,7 @@ pub struct Auction<M: ManagedTypeApi> {
 
     pub start_timestamp: u64,
 
+    pub current_quantity: BigUint<M>,
     pub max_quantity: BigUint<M>,
 }
 
@@ -39,6 +40,5 @@ pub struct Auction<M: ManagedTypeApi> {
 )]
 pub struct AuctionStats<M: ManagedTypeApi> {
     pub auction: Auction<M>,
-    pub remaining_output_items: BigUint<M>,
     pub id: u64,
 }

@@ -53,7 +53,7 @@ fn retire_token_should_work() {
         .execute_query(&setup.contract_wrapper, |sc| {
             let auction = sc.get_auction_stats(STARTING_AUCTION_ID);
 
-            assert_eq!(auction.remaining_output_items, REMAINING_QUANTITY);
+            assert_eq!(auction.auction.current_quantity, REMAINING_QUANTITY);
         })
         .assert_ok();
 }
@@ -116,7 +116,7 @@ fn add_tokens_should_work() {
         .execute_query(&setup.contract_wrapper, |sc| {
             let auction = sc.get_auction_stats(STARTING_AUCTION_ID);
 
-            assert_eq!(auction.remaining_output_items, NEW_QUANTITY);
+            assert_eq!(auction.auction.current_quantity, NEW_QUANTITY);
         })
         .assert_ok();
 }

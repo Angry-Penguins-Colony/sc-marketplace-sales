@@ -40,7 +40,8 @@ fn create_auction() {
                     start_timestamp: START_TIMESTAMP,
                     input_token_id: EgldOrEsdtTokenIdentifier::egld(),
                     input_token_nonce: 0,
-                    max_quantity: managed_biguint!(QUANTITY)
+                    max_quantity: managed_biguint!(QUANTITY),
+                    current_quantity: managed_biguint!(QUANTITY)
                 }
             );
         })

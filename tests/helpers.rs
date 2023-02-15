@@ -38,6 +38,19 @@ where
         );
     }
 
+    pub fn retire_auction(&mut self, auction_id: u64, amount: u64) {
+        self.blockchain_wrapper
+            .execute_tx(
+                &self.owner_address,
+                &self.contract_wrapper,
+                &rust_biguint!(0),
+                |sc| {
+                    sc.retire_token_from_auction(auction_id, &managed_biguint!(amount));
+                },
+            )
+            .assert_ok();
+    }
+
     pub fn create_auction_buyable_in_egld(
         &mut self,
         output_token_id: &[u8],

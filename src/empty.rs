@@ -64,7 +64,8 @@ pub trait EmptyContract {
             input_token_nonce,
             output_token_nonce: payment.token_nonce,
             output_token_id: payment.token_identifier,
-            max_quantity: payment.amount,
+            max_quantity: payment.amount.clone(),
+            current_quantity: payment.amount,
         });
 
         self.next_auction_id().set(new_auction_id + 1);
@@ -89,7 +90,8 @@ pub trait EmptyContract {
             ERR_INVALID_PAYMENT_TOKEN_NONCE_MISMATCH
         );
 
-        auction.max_quantity += payment.amount;
+        auction.max_quantity += payment.amount.clone();
+        auction.current_quantity += payment.amount;
 
         self.auctions(auction_id).set(auction);
     }
@@ -99,7 +101,7 @@ pub trait EmptyContract {
     fn retire_token_from_auction(&self, auction_id: u64, amount: &BigUint<Self::Api>) {
         let caller = self.blockchain().get_caller();
 
-        let auction = self.get_auction(auction_id);
+        let mut auction = self.get_auction(auction_id);
 
         self.send().direct_esdt(
             &caller,
@@ -107,6 +109,11 @@ pub trait EmptyContract {
             auction.output_token_nonce,
             amount,
         );
+
+        auction.current_quantity -= amount;
+        auction.max_quantity -= amount;
+
+        self.auctions(auction_id).set(auction);
     }
 
     #[only_owner]
@@ -151,7 +158,7 @@ pub trait EmptyContract {
     #[payable("*")]
     #[endpoint]
     fn buy(&self, auction_id: u64) {
-        let auction = self.get_auction(auction_id);
+        let mut auction = self.get_auction(auction_id);
 
         require!(
             self.blockchain().get_block_timestamp() >= auction.start_timestamp,
@@ -189,6 +196,10 @@ pub trait EmptyContract {
             auction.output_token_nonce,
             &wanted_buy_amount,
         );
+
+        auction.current_quantity -= wanted_buy_amount;
+
+        self.auctions(auction_id).set(auction);
     }
 
     fn get_auction(&self, auction_id: u64) -> Auction<Self::Api> {
@@ -204,11 +215,8 @@ pub trait EmptyContract {
     fn get_auction_stats(&self, auction_id: u64) -> AuctionStats<Self::Api> {
         let auction = self.get_auction(auction_id);
 
-        let remaining_output_items = self.get_remaining_amount(&auction);
-
         return AuctionStats {
             auction,
-            remaining_output_items,
             id: auction_id,
         };
     }
